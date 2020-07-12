@@ -94,8 +94,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .width(10)
                     .add(marker.getPosition(),mPreviousMarker.getPosition());
             mMap.addPolyline(polylineOptions);
-            mPreviousMarker = marker;
         }
+        mPreviousMarker = marker;
 //        dump(option);
     }
 
