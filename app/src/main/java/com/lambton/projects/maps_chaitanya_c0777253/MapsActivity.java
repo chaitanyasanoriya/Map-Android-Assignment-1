@@ -43,7 +43,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleMap.OnPolylineClickListener, GoogleMap.OnPolygonClickListener, GoogleMap.OnMapLongClickListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleMap.OnPolylineClickListener, GoogleMap.OnPolygonClickListener, GoogleMap.OnMapLongClickListener, GoogleMap.OnMarkerDragListener {
 
     private static final int REQUEST_CODE = 1;
     private static final float DEFAULT_ZOOM_LEVEL = 10.0f;
@@ -96,6 +96,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setOnMapLongClickListener(this);
         mMap.setOnPolylineClickListener(this);
         mMap.setOnPolygonClickListener(this);
+        mMap.setOnMarkerDragListener(this);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestLocationPermission();
             return;
@@ -105,16 +106,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapClick(LatLng latLng) {
-        if (mMarkerList.size() < POLYGON_SIDES) {
-            MarkerOptions option = getMarkerOption(latLng);
-            Marker marker = mMap.addMarker(option);
-            marker.setAnchor(0.4f, 1);
-            drawPolyline(marker);
-            setTitleSnippet(latLng, marker);
-            mPreviousMarker = marker;
-            mMarkerList.add(marker);
-            drawPolygon();
+        if (mMarkerList.size() == POLYGON_SIDES) {
+            mMarkerList.remove(0);
         }
+        MarkerOptions option = getMarkerOption(latLng);
+        Marker marker = mMap.addMarker(option);
+        marker.setAnchor(0.4f, 1);
+//        marker.setDraggable(true);
+        drawPolyline(marker);
+        setTitleSnippet(latLng, marker);
+        mPreviousMarker = marker;
+        mMarkerList.add(marker);
+        drawPolygon();
     }
 
     private void drawPolygon() {
@@ -236,6 +239,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private MarkerOptions getMarkerOption(LatLng latLng) {
         MarkerOptions option = new MarkerOptions().position(latLng);
         option.icon(BitmapDescriptorFactory.fromResource(R.mipmap.marker));
+        option.draggable(true);
         return option;
     }
 
@@ -339,20 +343,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Toast.makeText(this, "hello world", Toast.LENGTH_SHORT).show();
         LatLng place1 = polyline.getPoints().get(0);
         LatLng place2 = polyline.getPoints().get(1);
-        LatLng mid_point = midPoint(place1.latitude,place1.longitude,place2.latitude,place2.longitude);
-        double distance = distance(place1.latitude,place1.longitude,place2.latitude,place2.longitude);
-        showDistanceMarker(mid_point, distance,null);
+        LatLng mid_point = midPoint(place1.latitude, place1.longitude, place2.latitude, place2.longitude);
+        double distance = distance(place1.latitude, place1.longitude, place2.latitude, place2.longitude);
+        showDistanceMarker(mid_point, distance, null);
     }
 
     private void showDistanceMarker(LatLng latLng, double distance, String snippet) {
-        if(mInfoMarker != null)
-        {
+        if (mInfoMarker != null) {
             mInfoMarker.remove();
         }
         BitmapDescriptor transparent = BitmapDescriptorFactory.fromResource(R.mipmap.transparent);
         MarkerOptions options = new MarkerOptions()
                 .position(latLng)
-                .title(String.format("%.2f Km",distance))
+                .title(String.format("%.2f Km", distance))
                 .snippet(snippet)
                 .icon(transparent)
                 .anchor((float) 0.5, (float) 0.5); //puts the info window on the polyline
@@ -382,7 +385,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return (rad * 180.0 / Math.PI);
     }
 
-    public LatLng midPoint(double lat1,double lon1,double lat2,double lon2){
+    public LatLng midPoint(double lat1, double lon1, double lat2, double lon2) {
 
         double dLon = Math.toRadians(lon2 - lon1);
 
@@ -398,7 +401,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         //print out in degrees
         System.out.println(Math.toDegrees(lat3) + " " + Math.toDegrees(lon3));
-        return new LatLng(Math.toDegrees(lat3),Math.toDegrees(lon3));
+        return new LatLng(Math.toDegrees(lat3), Math.toDegrees(lon3));
     }
 
 
@@ -408,22 +411,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         double distance = 0;
         LatLng latLng = null;
         LatLng mid_point = null;
-        for(LatLng latLng1: polygon.getPoints())
-        {
-            if(latLng!=null)
-            {
-                distance += distance(latLng.latitude,latLng.longitude,latLng1.latitude,latLng1.longitude);
-                mid_point = midPoint(latLng.latitude,latLng.longitude,latLng1.latitude,latLng1.longitude);
+        for (LatLng latLng1 : polygon.getPoints()) {
+            if (latLng != null) {
+                distance += distance(latLng.latitude, latLng.longitude, latLng1.latitude, latLng1.longitude);
+                mid_point = midPoint(latLng.latitude, latLng.longitude, latLng1.latitude, latLng1.longitude);
             }
             latLng = latLng1;
         }
-        showDistanceMarker(mid_point,distance,"A - B - C - D");
+        showDistanceMarker(mid_point, distance, "A - B - C - D");
     }
 
     @Override
     public void onMapLongClick(LatLng latLng) {
-        for(Marker marker : mMarkerList) {
-            if(Math.abs(marker.getPosition().latitude - latLng.latitude) < 0.05 && Math.abs(marker.getPosition().longitude - latLng.longitude) < 0.05) {
+        for (Marker marker : mMarkerList) {
+            if (Math.abs(marker.getPosition().latitude - latLng.latitude) < 0.05 && Math.abs(marker.getPosition().longitude - latLng.longitude) < 0.05) {
                 Toast.makeText(MapsActivity.this, marker.getTitle(), Toast.LENGTH_SHORT).show(); //do some stuff
                 marker.remove();
                 mMarkerList.remove(marker);
@@ -435,22 +436,51 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void removePolygon() {
-        if(mPolygon != null)
-        {
+        if (mPolygon != null) {
             mPolygon.remove();
         }
     }
 
     private void removePolyline(Marker marker) {
-        for(Polyline polyline: mPolylineList)
-        {
-            if(polyline.getPoints().get(0).equals(marker.getPosition()) || polyline.getPoints().get(1).equals(marker.getPosition()))
-            {
+        for (Polyline polyline : mPolylineList) {
+            if (polyline.getPoints().get(0).equals(marker.getPosition()) || polyline.getPoints().get(1).equals(marker.getPosition())) {
                 polyline.remove();
                 mPolylineList.remove(polyline);
                 removePolyline(marker);
                 break;
             }
+        }
+    }
+
+    @Override
+    public void onMarkerDragStart(Marker marker) {
+        System.out.println(marker.getPosition());
+    }
+
+    @Override
+    public void onMarkerDrag(Marker marker) {
+
+    }
+
+    @Override
+    public void onMarkerDragEnd(Marker marker) {
+        System.out.println(marker.getPosition());
+        setTitleSnippet(marker.getPosition(),marker);
+        removePolylines();
+        drawAllPolylines();
+        removePolygon();
+        drawPolygon();
+    }
+
+    private void drawAllPolylines() {
+        Marker marker = null;
+        for(Marker marker1: mMarkerList)
+        {
+            if(marker != null)
+            {
+                drawPolyline(marker.getPosition(),marker1.getPosition());
+            }
+            marker = marker1;
         }
     }
 }
