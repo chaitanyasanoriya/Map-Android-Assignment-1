@@ -1,9 +1,5 @@
 package com.lambton.projects.maps_chaitanya_c0777253;
 
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.FragmentActivity;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -18,7 +14,10 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,14 +32,9 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.maps.android.PolyUtil;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -53,8 +47,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     private Marker mPreviousMarker;
-    private List<Marker> mMarkerList = new ArrayList<>();
-    private List<Polyline> mPolylineList = new ArrayList<>();
+    private final List<Marker> mMarkerList = new ArrayList<>();
+    private final List<Polyline> mPolylineList = new ArrayList<>();
     private Marker mInfoMarker;
     private LocationManager mLocationManager;
     private Polygon mPolygon;
@@ -207,7 +201,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     {
         if (mPreviousMarker != null)
         {
-            System.out.println("Adding polyline");
+
             PolylineOptions polylineOptions = new PolylineOptions()
                     .color(Color.RED)
                     .width(20)
@@ -245,7 +239,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 MapsActivity.this.runOnUiThread(() -> marker.setTitle("Unknown Location"));
             } else
             {
-                System.out.println("Adding Title");
+
                 final String[] finalResult = result;
                 MapsActivity.this.runOnUiThread(() ->
                 {
@@ -295,8 +289,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onPolylineClick(Polyline polyline)
     {
-        System.out.println("clicked");
-        Toast.makeText(this, "hello world", Toast.LENGTH_SHORT).show();
         LatLng place1 = polyline.getPoints().get(0);
         LatLng place2 = polyline.getPoints().get(1);
         LatLng mid_point = Utils.midPoint(place1.latitude, place1.longitude, place2.latitude, place2.longitude);
@@ -325,7 +317,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onPolygonClick(Polygon polygon)
     {
-        System.out.println("polygon: "+ mPolylineList.size());
+
         double distance = 0;
         LatLng latLng = null;
         LatLng mid_point = null;
@@ -348,7 +340,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         {
             if (Math.abs(marker.getPosition().latitude - latLng.latitude) < 0.05 && Math.abs(marker.getPosition().longitude - latLng.longitude) < 0.05)
             {
-                Toast.makeText(MapsActivity.this, marker.getTitle(), Toast.LENGTH_SHORT).show(); //do some stuff
                 marker.remove();
                 mMarkerList.remove(marker);
                 removePolyline(marker);
@@ -403,7 +394,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMarkerDragEnd(Marker marker)
     {
-        System.out.println(marker.getPosition());
+
         setTitleSnippet(marker.getPosition(), marker);
         removePolylines();
         drawAllPolylines();

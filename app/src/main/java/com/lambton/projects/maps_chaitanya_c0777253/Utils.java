@@ -4,9 +4,7 @@ import android.location.Address;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.lang.reflect.Field;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class Utils
@@ -48,7 +46,7 @@ public class Utils
         }
         if (address.getThoroughfare() != null)
         {
-            if (!title.toString().equals("") || !title.toString().equals(" "))
+            if (!title.toString().isEmpty())
             {
                 title.append(", ");
             }
@@ -56,7 +54,7 @@ public class Utils
         }
         if (address.getPostalCode() != null)
         {
-            if (!title.toString().equals("") || !title.toString().equals(" "))
+            if (!title.toString().isEmpty())
             {
                 title.append(", ");
             }
@@ -75,26 +73,6 @@ public class Utils
             snippet.append(address.getAdminArea());
         }
         return new String[]{title.toString(), snippet.toString()};
-    }
-
-    public static void dump(Object o)
-    {
-        if (o == null)
-        {
-            System.out.println("dump object is null");
-            return;
-        }
-        Field[] fields = o.getClass().getDeclaredFields();
-        for (Field field : fields)
-        {
-            try
-            {
-                System.out.println(field.getName() + " - " + field.get(o));
-            } catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
     }
 
     public static double distance(double lat1, double lon1, double lat2, double lon2)
@@ -123,7 +101,6 @@ public class Utils
 
     public static LatLng midPoint(double lat1, double lon1, double lat2, double lon2)
     {
-
         double dLon = Math.toRadians(lon2 - lon1);
 
         //convert to radians
@@ -136,8 +113,6 @@ public class Utils
         double lat3 = Math.atan2(Math.sin(lat1) + Math.sin(lat2), Math.sqrt((Math.cos(lat1) + Bx) * (Math.cos(lat1) + Bx) + By * By));
         double lon3 = lon1 + Math.atan2(By, Math.cos(lat1) + Bx);
 
-        //print out in degrees
-        System.out.println(Math.toDegrees(lat3) + " " + Math.toDegrees(lon3));
         return new LatLng(Math.toDegrees(lat3), Math.toDegrees(lon3));
     }
 }
